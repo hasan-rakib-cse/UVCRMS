@@ -19,7 +19,7 @@ namespace UVCRMS.Models
         [Required(ErrorMessage = "Please Give the Contact Number"), StringLength(20)]
         public string StudentContactNo { get; set; }
 
-        [DataType(DataType.Date), Display(Name = "Please Select  Date"), StringLength(50)]
+        //[DataType(DataType.Date), Display(Name = "Please Select  Date"), StringLength(50)]
         public string? Date { get; set; }
 
         [DataType(DataType.MultilineText), StringLength(300)]
@@ -34,5 +34,9 @@ namespace UVCRMS.Models
 
 
         public Department? Department { get; set; }
+
+
+        public List<EnrollInACourse>? EnrollInACourses { get; set; }
+        public List<SaveStudentResult>? SaveStudentResults { get; set; }
     }
 }

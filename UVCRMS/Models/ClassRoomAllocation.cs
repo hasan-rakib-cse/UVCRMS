@@ -15,16 +15,16 @@ namespace UVCRMS.Models
         [StringLength(50)]
         public string? Status { get; set; }
 
-        [Required, Display(Name = "Department")]
+        [Required, Display(Name = "Select Department")]
         public int DepartmentId { get; set; }
 
-        [Required, Display(Name = "Course")]
+        [Required, Display(Name = "Select Course")]
         public int CourseId { get; set; }
 
-        [Required, Display(Name = "Room")]
+        [Required, Display(Name = "Select Room")]
         public int RoomId { get; set; }
 
-        [Required, Display(Name = "Day")]
+        [Required, Display(Name = "Select Day")]
         public int SevenDayWeekId { get; set; }
 
 

@@ -6,7 +6,7 @@ namespace UVCRMS.Models
     {
         public int Id { get; set; }
 
-        [Required, Display(Name = "Student Reg. No.")]
+        [Required, Display(Name = "Select Student")]
         public int StudentId { get; set; }
 
         [Required, Display(Name = "Select Course")]

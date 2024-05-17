@@ -6,13 +6,13 @@ namespace UVCRMS.Models
     {
         public int Id { get; set; }
 
-        [Required, Display(Name = "Department")]
+        [Required, Display(Name = "Select Department")]
         public int DepartmentId { get; set; }
 
-        [Required(ErrorMessage = "Please Give the Teacher Name"), Display(Name = "Teacher")]
+        [Required(ErrorMessage = "Please Give the Teacher Name"), Display(Name = "Select Teacher")]
         public int TeacherId { get; set; }
 
-        [Required(ErrorMessage = "Please Give the Course Code"), Display(Name = "Course")]
+        [Required(ErrorMessage = "Please Give the Course Code"), Display(Name = "Select Course")]
         public int CourseId { get; set; }
 
         [StringLength(50)]

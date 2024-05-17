@@ -9,7 +9,11 @@ namespace UVCRMS.Models
         [StringLength(20)]
         public string DayCode { get; set; }
 
-        [StringLength(30)]
+        [Required, StringLength(30)]
         public string DayName { get; set; }
+
+
+
+        public List<ClassRoomAllocation>? ClassRoomAllocations { get; set; }
     }
 }

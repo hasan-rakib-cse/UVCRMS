@@ -41,5 +41,9 @@ namespace UVCRMS.Models
 
         public Department? Department { get; set; }
         public Designation? Designation { get; set; }
+        public Course? Course { get; set; }
+
+
+        public List<CourseAssignToTeacher>? CourseAssignToTeachers { get; set; }
     }
 }

@@ -6,7 +6,11 @@ namespace UVCRMS.Models
     {
         public int Id { get; set; }
 
-        [StringLength(15)]
+        [Required, StringLength(15), Display(Name = "Select Grade")]
         public string GradeLetter { get; set; }
+
+
+
+        public List<SaveStudentResult>? SaveStudentResults { get; set; }
     }
 }

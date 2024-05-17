@@ -27,14 +27,22 @@ namespace UVCRMS.Models
         [StringLength(300)]
         public string CourseDescription { get; set; }
 
-        [Required(ErrorMessage = "Please Select Department Name"), Display(Name = "Department")]
+        [Required(ErrorMessage = "Please Select Department Name"), Display(Name = "Select Department")]
         public int DepartmentId { get; set; }
 
-        [Required(ErrorMessage = "Please Select Semester Name"), Display(Name = "Semester")]
+        [Required(ErrorMessage = "Please Select Semester Name"), Display(Name = "Select Semester")]
         public int SemesterId { get; set; }
 
 
         public Department? Department { get; set; }
         public Semester? Semester { get; set; }
+
+
+
+        public List<ClassRoomAllocation>? ClassRoomAllocations { get; set; }
+        public List<CourseAssignToTeacher>? CourseAssignToTeachers { get; set; }
+        public List<EnrollInACourse>? EnrollInACourses { get; set; }
+        public List<SaveStudentResult>? SaveStudentResults { get; set; }
+        public List<Teacher>? Teachers { get; set; }
     }
 }

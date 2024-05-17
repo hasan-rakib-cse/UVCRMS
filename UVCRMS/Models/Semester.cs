@@ -9,5 +9,9 @@ namespace UVCRMS.Models
 
         [Required, StringLength(50)]
         public string SemesterName { get; set; }
+
+
+
+        public List<Course>? Courses { get; set; }
     }
 }
