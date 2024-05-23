@@ -19,7 +19,7 @@ namespace UVCRMS.Models
         [Required(ErrorMessage = "Please Give the Contact Number"), StringLength(20)]
         public string StudentContactNo { get; set; }
 
-        //[DataType(DataType.Date), Display(Name = "Please Select  Date"), StringLength(50)]
+        [DataType(DataType.Date), Display(Name = "Please Select  Date")]
         public string? Date { get; set; }
 
         [DataType(DataType.MultilineText), StringLength(300)]

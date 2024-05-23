@@ -35,7 +35,7 @@ namespace UVCRMS.Models
         [Range(+.5, Double.MaxValue, ErrorMessage = "Credit Can not be negetive")]
         public double CreditToBeTaken { get; set; }
 
-        public double? TeacherRemainingCredit { get; set; }
+        //public double? TeacherRemainingCredit { get; set; }
 
 
 

@@ -18,6 +18,7 @@ namespace UVCRMS.Models
         [StringLength(50)]
         public string? Status { get; set; }
 
+        [DataType(DataType.Date), Display(Name = "Please Select  Date")]
         public string? Date { get; set; }
 
 
