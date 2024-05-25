@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using UVCRMS.Data;
-using UVCRMS.Gateway;
+//using UVCRMS.Gateway;
 using UVCRMS.Models;
 
 namespace UVCRMS.Controllers
@@ -63,7 +63,7 @@ namespace UVCRMS.Controllers
             return RedirectToAction("Create", "AllocateClassRoom").WithError("Time Formate Not Right");
 
         }
-        
+
 
         public bool IsDayExist(int courseId, int dayId)
         {
@@ -183,6 +183,6 @@ namespace UVCRMS.Controllers
             }
             base.Dispose(disposing);
         }
-    
+
     }
 }

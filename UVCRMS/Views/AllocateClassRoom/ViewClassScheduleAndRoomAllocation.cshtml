@@ -1,0 +1,73 @@
+﻿@model UVCRMS.Models.ClassRoomAllocation
+
+@{
+    ViewBag.Title = "View Class Schedule And Room Allocation";
+}
+
+<div class="container" style="width: 70%; margin: 0 auto">
+    <div class="row registered table">
+        <div class="col-md-12">
+            <h3>View Class Schedule and Room Allocation Information</h3>
+            @Html.Label("Department ")
+            @Html.DropDownListFor(model => model.DepartmentId, ViewBag.Departments as SelectList, "--Select--", new { @class = "form-control" })
+            <table id="myTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Course Code </th>
+                        <th>Course Title </th>
+
+                        <th>Schedule Info </th>
+                    </tr>
+                </thead>
+
+            </table>
+        </div>
+    </div>
+</div>
+
+<link href="~/Content/DataTables/css/jquery.dataTables.css" rel="stylesheet" />
+
+
+@section scripts
+{
+    <a href="~/lib/jquery/dist/jquery.min.map">~/lib/jquery/dist/jquery.min.map</a>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/Scripts/DataTables/jquery.dataTables.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#DepartmentId").change(function () {
+                var deptId = $("#DepartmentId").val();
+                var parameter = { deptId: deptId }
+
+
+                //  $("#DepartmentId").append('<option value="">--Select--</option>');
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("GetClassScheduleAndRoomAllocationByDeptId", "AllocateClassRoom")',
+                    contentType: "application/json;charset=utf-8",
+                    data: JSON.stringify(parameter),
+                    success: function (data) {
+                        $("#myTable").show();
+                        table.clear().draw(false);
+                        $.each(data, function (key, value) {
+                            table.row.add([
+                                value.CourseCode, value.CourseName, value.ScheduleInfo
+                            ]
+                            ).draw(false);
+
+                        });
+
+                    }
+
+                });
+
+            });
+
+
+            var table = $('#myTable').DataTable();
+        });
+    </script>
+}

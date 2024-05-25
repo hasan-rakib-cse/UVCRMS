@@ -1,0 +1,88 @@
+﻿@model UVCRMS.Models.ClassRoomAllocation
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Allocate ClassRoom</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="DepartmentId" class="control-label"></label>
+                <select asp-for="DepartmentId" id="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="CourseId" class="control-label"></label>
+                <select asp-for="CourseId" id="CourseId" class="form-control" asp-items="ViewBag.CourseId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="RoomId" class="control-label"></label>
+                <select asp-for="RoomId" class="form-control" asp-items="ViewBag.RoomId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="SevenDayWeekId" class="control-label"></label>
+                <select asp-for="SevenDayWeekId" class ="form-control" asp-items="ViewBag.SevenDayWeekId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="TimeFrom" class="control-label"></label>
+                <input asp-for="TimeFrom" class="form-control" />
+                <span asp-validation-for="TimeFrom" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TimeTo" class="control-label"></label>
+                <input asp-for="TimeTo" class="form-control" />
+                <span asp-validation-for="TimeTo" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Status" class="control-label"></label>
+                <input asp-for="Status" class="form-control" />
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+            
+            
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+@section scripts {
+    <script>
+        $("#DepartmentId").change(function () {
+            var deptId = $("#DepartmentId").val();
+            $("#CourseId").empty();
+
+            $("#CourseId").append('<option value= "">---select---</option>');
+
+            var parameter = { deptId: deptId }
+
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetCourseByDeptId", "AllocateClassRoom")',
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(parameter),
+                success: function (data) {
+                    $.each(data, function (key, value) {
+                        $("#CourseId").append('<option value=' + value.CourseId + '>' + value.CourseCode + '</option>');
+
+                    });
+                }
+            });
+
+        });
+    </script>
+}
