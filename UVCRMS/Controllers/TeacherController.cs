@@ -14,12 +14,10 @@ namespace UVCRMS.Controllers
             db = dbContext;
         }
 
-
         public IActionResult Index()
         {
             return View(db.Teachers.ToList());
         }
-
 
         public IActionResult Create()
         {
@@ -27,7 +25,6 @@ namespace UVCRMS.Controllers
             ViewBag.Designations = new SelectList(db.Designations.ToList(), "Id", "DesignationName");
             return View();
         }
-
 
         [HttpPost]
         public IActionResult Create(Teacher teacher)
@@ -37,38 +34,26 @@ namespace UVCRMS.Controllers
             if (ModelState.IsValid)
             {
                 teacher.TeacherRemainingCredit = teacher.CreditToBeTaken;
-                db.Entry(teacher).State = EntityState.Added;
+                db.Teachers.Add(teacher);
                 db.SaveChanges();
-                //return RedirectToAction("Create", "Teacher").WithNotice("Successfully Teacher Saved");
+                TempData["SuccessMessage"] = "Successfully Teacher Saved";
                 return RedirectToAction("Create", "Teacher");
             }
 
-            ModelState.Clear();
-            //return View().WithFlash("Not Saved");
+            TempData["ErrorMessage"] = "Not Saved";
             return View();
         }
 
-
-        //public JsonResult IsEmailExist(string TeacherEmail)
-        //{
-        //    var email = db.Teachers.ToList();
-        //    if (!email.Any(x => x.TeacherEmail.ToLower() == TeacherEmail.ToLower()))
-        //    {
-        //        return Json(true, JsonRequestBehavior.AllowGet);
-        //    }
-        //    return Json(false, JsonRequestBehavior.AllowGet);
-        //}
-
-        //[HttpPost]
-        public IActionResult IsEmailExist(string teacherEmail)
+        [HttpGet]
+        public JsonResult IsEmailExist(string TeacherEmail)
         {
-            var emailExists = db.Teachers
-                                .Any(x => x.TeacherEmail.ToLower() == teacherEmail.ToLower());
-
-            // Return JSON response (true if email does not exist, false if it does)
-            return Json(!emailExists);
+            var email = db.Teachers.ToList();
+            if (!email.Any(x => x.TeacherEmail.ToLower() == TeacherEmail.ToLower()))
+            {
+                return Json(true);
+            }
+            return Json(false);
         }
-
 
         protected override void Dispose(bool disposing)
         {
