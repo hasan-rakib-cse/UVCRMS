@@ -10,9 +10,11 @@ namespace UVCRMS.Controllers
     public class CourseAssignToTeacherController : Controller
     {
         private readonly ApplicationDbContext db;
-        public CourseAssignToTeacherController(ApplicationDbContext dbContext)
+        private readonly CourseAssignTeacherGateway courseStatics;
+        public CourseAssignToTeacherController(ApplicationDbContext dbContext, CourseAssignTeacherGateway courseAssignTeacherGateway)
         {
             db = dbContext;
+            courseStatics = courseAssignTeacherGateway;
         }
 
 
@@ -30,26 +32,87 @@ namespace UVCRMS.Controllers
         }
 
 
+        //[HttpPost]
+        //public IActionResult CourseAssignToTeacher(CourseAssignToTeacher courseAssign)
+        //{
+        //    var course = db.Courses.FirstOrDefault(x => x.Id == courseAssign.CourseId);
+        //    var teacher = db.Teachers.FirstOrDefault(x => x.Id == courseAssign.TeacherId);
+
+        //    if (IsCourseCodeExist(course.CourseCode.ToString()) && IsTeacherNameExist(teacher.TeacherName.ToString()))
+        //    {
+        //        teacher.TeacherRemainingCredit = teacher.TeacherRemainingCredit - course.CourseCredit;
+        //        db.Entry(teacher).State = EntityState.Modified;
+        //        db.SaveChanges();
+
+        //        courseAssign.Status = "Assigned";
+
+        //        db.Entry(courseAssign).State = EntityState.Added;
+        //        db.SaveChanges();
+
+        //        return RedirectToAction("CourseAssignToTeacher", "CourseAssignToTeacher").WithNotice("Course Assign To Teacher Successfully Saved");
+        //    }
+        //    return RedirectToAction("CourseAssignToTeacher", "CourseAssignToTeacher").WithNotice("Not Saved Bcoz Teacher Name Or Course Code Already Exist");
+        //}
+
         [HttpPost]
         public IActionResult CourseAssignToTeacher(CourseAssignToTeacher courseAssign)
         {
+            // Check if the input is valid
+            if (courseAssign == null || courseAssign.CourseId <= 0 || courseAssign.TeacherId <= 0)
+            {
+                //return RedirectToAction("CourseAssignToTeacher")
+                //    .WithNotice("Invalid input. Please provide valid course and teacher details.");
+                return RedirectToAction("CourseAssignToTeacher");
+            }
+
             var course = db.Courses.FirstOrDefault(x => x.Id == courseAssign.CourseId);
             var teacher = db.Teachers.FirstOrDefault(x => x.Id == courseAssign.TeacherId);
 
-            if (IsCourseCodeExist(course.CourseCode.ToString()) && IsTeacherNameExist(teacher.TeacherName.ToString()))
+            // Ensure course and teacher exist
+            if (course == null)
             {
-                teacher.TeacherRemainingCredit = teacher.TeacherRemainingCredit - course.CourseCredit;
+                //return RedirectToAction("CourseAssignToTeacher")
+                //    .WithNotice("Course not found.");
+                return RedirectToAction("CourseAssignToTeacher");
+            }
+
+            if (teacher == null)
+            {
+                //return RedirectToAction("CourseAssignToTeacher")
+                //    .WithNotice("Teacher not found.");
+                return RedirectToAction("CourseAssignToTeacher");
+            }
+
+            // Check if the course code and teacher name exist in the system
+            if (IsCourseCodeExist(course.CourseCode) && IsTeacherNameExist(teacher.TeacherName))
+            {
+                if (teacher.TeacherRemainingCredit < course.CourseCredit)
+                {
+                    //return RedirectToAction("CourseAssignToTeacher")
+                    //    .WithNotice("Teacher does not have enough remaining credits to assign this course.");
+                    return RedirectToAction("CourseAssignToTeacher");
+                }
+
+                // Update the remaining credit of the teacher
+                teacher.TeacherRemainingCredit -= course.CourseCredit;
                 db.Entry(teacher).State = EntityState.Modified;
                 db.SaveChanges();
 
+                // Mark the course as assigned to the teacher
                 courseAssign.Status = "Assigned";
-
                 db.Entry(courseAssign).State = EntityState.Added;
                 db.SaveChanges();
 
-                return RedirectToAction("CourseAssignToTeacher", "CourseAssignToTeacher").WithNotice("Course Assign To Teacher Successfully Saved");
+                // Redirect back with a success message
+                //return RedirectToAction("CourseAssignToTeacher")
+                //    .WithNotice("Course assigned to teacher successfully!");
+                return RedirectToAction("CourseAssignToTeacher");
             }
-            return RedirectToAction("CourseAssignToTeacher", "CourseAssignToTeacher").WithNotice("Not Saved Bcoz Teacher Name Or Course Code Already Exist");
+
+            // If course code or teacher name already exists in the assignment
+            //return RedirectToAction("CourseAssignToTeacher")
+            //    .WithNotice("Not saved because the teacher name or course code already exists.");
+            return RedirectToAction("CourseAssignToTeacher");
         }
 
 
@@ -77,8 +140,8 @@ namespace UVCRMS.Controllers
 
         public JsonResult GetAllAssignCourses(int deptId)
         {
-            var courseStatics = new CourseAssignTeacherGateway().GetAllAssignCourses(deptId);
-            return Json(courseStatics, JsonRequestBehavior.AllowGet);
+            var assignedCourses = courseStatics.GetAllAssignCourses(deptId);
+            return Json(assignedCourses);
         }
 
 

@@ -1,67 +1,95 @@
 ﻿@model UVCRMS.Models.ClassRoomAllocation
-
+@* @using FlashMessage; *@
 @{
-    ViewData["Title"] = "Create";
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
 
-<h4>Allocate ClassRoom</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="DepartmentId" class="control-label"></label>
-                <select asp-for="DepartmentId" id="DepartmentId" class="form-control" asp-items="ViewBag.DepartmentId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="CourseId" class="control-label"></label>
-                <select asp-for="CourseId" id="CourseId" class="form-control" asp-items="ViewBag.CourseId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="RoomId" class="control-label"></label>
-                <select asp-for="RoomId" class="form-control" asp-items="ViewBag.RoomId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="SevenDayWeekId" class="control-label"></label>
-                <select asp-for="SevenDayWeekId" class ="form-control" asp-items="ViewBag.SevenDayWeekId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="TimeFrom" class="control-label"></label>
-                <input asp-for="TimeFrom" class="form-control" />
-                <span asp-validation-for="TimeFrom" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TimeTo" class="control-label"></label>
-                <input asp-for="TimeTo" class="form-control" />
-                <span asp-validation-for="TimeTo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" />
-                <span asp-validation-for="Status" class="text-danger"></span>
-            </div>
-            
-            
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="form-horizontal">
+
+    <h4 style="color:green;text-align:center">@Html.Flash()</h4>
+    <hr />
+    <h4>Allocate ClassRoom</h4>
+
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.DepartmentId, "Department", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.DepartmentId, ViewBag.Departments as SelectList, "--Select--", new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.CourseId, "Course", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <select name="CourseId" id="CourseId" , class="form-control">
+                <option value="">---Select---</option>
+            </select><br />
+            @Html.ValidationMessageFor(model => model.CourseId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.RoomId, "Room", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.RoomId, ViewBag.Rooms as SelectList, "--Select--", new { @class = "form-control" })
+
+            @Html.ValidationMessageFor(model => model.RoomId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.DayId, "Day", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(model => model.DayId, ViewBag.SevenDayWeeks as SelectList, "--Select--", new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.DayId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(model => model.TimeFrom, "From", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input id="TimeFrom" name="TimeFrom" type="time" class="form-control">
+            @Html.ValidationMessageFor(model => model.TimeFrom, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.TimeTo, "To", htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            <input id="TimeTo" name="TimeTo" type="time" class="form-control">
+            @Html.ValidationMessageFor(model => model.TimeTo, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+
+
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Allocate" class="btn btn-success" />
+        </div>
     </div>
 </div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
 
-@section scripts {
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
+<script src="~/Scripts/jquery-3.4.1.js"></script>
+<script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+<script src="~/Scripts/DataTables/jquery.dataTables.js"></script>
+@section scripts
+{
     <script>
+
+ 
+    $(document).ready(function () {
         $("#DepartmentId").change(function () {
             var deptId = $("#DepartmentId").val();
             $("#CourseId").empty();
@@ -80,9 +108,11 @@
                         $("#CourseId").append('<option value=' + value.CourseId + '>' + value.CourseCode + '</option>');
 
                     });
+
                 }
             });
-
+              
         });
+    });
     </script>
 }

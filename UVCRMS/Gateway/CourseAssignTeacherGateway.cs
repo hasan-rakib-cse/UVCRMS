@@ -1,80 +1,83 @@
 ﻿
-//using Microsoft.Data.SqlClient;
-//using Microsoft.EntityFrameworkCore;
-//using UVCRMS.Data;
-//using UVCRMS.Models;
-//using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using UVCRMS.Data;
+using UVCRMS.Models;
+using Microsoft.Extensions.Configuration;
+using System.Data;
 
-//namespace UVCRMS.Gateway
-//{
-//    public class CourseAssignTeacherGateway
-//    {
-//        private readonly IConfiguration _configuration;
-//        public CourseAssignTeacherGateway(IConfiguration configuration)
-//        {
-//            _configuration = configuration;
-//        }
+namespace UVCRMS.Gateway
+{
+    public class CourseAssignTeacherGateway
+    {
+        private readonly IConfiguration _configuration;
+        private readonly string conString;
+        public CourseAssignTeacherGateway(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            conString = configuration.GetConnectionString("ApplicationDbContext");
+        }
 
-//        private string conString = WebConfigurationManager.ConnectionStrings["ApplicationDbContext"].ConnectionString;
-//        //private string conString = _context.Database.GetDbConnection();
+        //private string conString = WebConfigurationManager.ConnectionStrings["ApplicationDbContext"].ConnectionString;
+        //private string conString = _context.Database.GetDbConnection();
 
-//        //private string conString = _configuration["ConnectionStrings:DefaultConnection"].
+        //private string conString = _configuration["ConnectionStrings:DefaultConnection"].
 
-//        public List<ViewAssignCourse> GetAllAssignCourses(int deptId)
-//        {
-//            //var conString = _context.Database.GetDbConnection();
+        public List<ViewAssignCourse> GetAllAssignCourses(int deptId)
+        {
+            //var conString = _context.Database.GetDbConnection();
 
-//            string query = "SELECT Courses.CourseCode, Courses.CoursName,Semesters.SemesterName,Teachers.TeacherName"
-//                            + " FROM CourseAssignToTeachers"
-//                            + " Right JOIN Courses ON Courses.Id=CourseAssignToTeachers.CourseId"
-//                            + " LEFT JOIN Teachers ON Teachers.Id=CourseAssignToTeachers.TeacherId"
-//                            + " Inner JOIN Semesters ON Courses.SemesterId=Semesters.Id"
-//                            + " where Courses.DepartmentId='" + deptId + "' order by CourseCode";
+            string query = "SELECT Courses.CourseCode, Courses.CoursName,Semesters.SemesterName,Teachers.TeacherName"
+                            + " FROM CourseAssignToTeachers"
+                            + " Right JOIN Courses ON Courses.Id=CourseAssignToTeachers.CourseId"
+                            + " LEFT JOIN Teachers ON Teachers.Id=CourseAssignToTeachers.TeacherId"
+                            + " Inner JOIN Semesters ON Courses.SemesterId=Semesters.Id"
+                            + " where Courses.DepartmentId='" + deptId + "' order by CourseCode";
 
-//            SqlConnection connection = new SqlConnection(conString);
-//            SqlCommand command = new SqlCommand(query, connection);
-//            connection.Open();
-//            SqlDataReader reader = command.ExecuteReader();
-//            List<ViewAssignCourse> listOfItems = new List<ViewAssignCourse>();
+            SqlConnection connection = new SqlConnection(conString);
+            SqlCommand command = new SqlCommand(query, connection);
+            connection.Open();
+            SqlDataReader reader = command.ExecuteReader();
+            List<ViewAssignCourse> listOfItems = new List<ViewAssignCourse>();
 
-//            while (reader.Read())
-//            {
-//                ViewAssignCourse viewAssignCourse = new ViewAssignCourse();
+            while (reader.Read())
+            {
+                ViewAssignCourse viewAssignCourse = new ViewAssignCourse();
 
-//                viewAssignCourse.CourseCode = reader["CourseCode"].ToString();
-//                viewAssignCourse.CoursName = reader["CoursName"].ToString();
-//                viewAssignCourse.CourseSemester = reader["SemesterName"].ToString();
-//                viewAssignCourse.AssignTeacherName = reader["TeacherName"].ToString();
+                viewAssignCourse.CourseCode = reader["CourseCode"].ToString();
+                viewAssignCourse.CoursName = reader["CoursName"].ToString();
+                viewAssignCourse.CourseSemester = reader["SemesterName"].ToString();
+                viewAssignCourse.AssignTeacherName = reader["TeacherName"].ToString();
 
-//                if (viewAssignCourse.AssignTeacherName == "")
-//                {
-//                    viewAssignCourse.AssignTeacherName = "Not Assigned Yet";
-//                }
+                if (viewAssignCourse.AssignTeacherName == "")
+                {
+                    viewAssignCourse.AssignTeacherName = "Not Assigned Yet";
+                }
 
-//                listOfItems.Add(viewAssignCourse);
-//            }
+                listOfItems.Add(viewAssignCourse);
+            }
 
-//            connection.Close();
-//            return listOfItems;
-//        }
+            connection.Close();
+            return listOfItems;
+        }
 
 
-//        public bool UnAllocateClassRoom()
-//        {
-//            SqlConnection connection = new SqlConnection(conString);
-//            string query = "UPDATE ClassRoomAllocations SET Status = " + "1" + " ";
-//            SqlCommand command = new SqlCommand(query, connection);
-//            connection.Open();
-//            int rowAffect = command.ExecuteNonQuery();
-//            connection.Close();
+        public bool UnAllocateClassRoom()
+        {
+            SqlConnection connection = new SqlConnection(conString);
+            string query = "UPDATE ClassRoomAllocations SET Status = " + "1" + " ";
+            SqlCommand command = new SqlCommand(query, connection);
+            connection.Open();
+            int rowAffect = command.ExecuteNonQuery();
+            connection.Close();
 
-//            if (rowAffect > 0)
-//            {
-//                return true;
-//            }
+            if (rowAffect > 0)
+            {
+                return true;
+            }
 
-//            return false;
-//        }
+            return false;
+        }
 
-//    }
-//}
+    }
+}

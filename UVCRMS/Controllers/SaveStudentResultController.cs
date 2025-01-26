@@ -51,15 +51,16 @@ namespace UVCRMS.Controllers
             db.Entry(saveStudentResult).State = EntityState.Added;
             db.SaveChanges();
 
-            return RedirectToAction("CreateEnrollCourse", "EnrollCourse").WithNotice("Student Result Successfully");
+            //return RedirectToAction("CreateEnrollCourse", "EnrollCourse").WithNotice("Student Result Successfully");
+            return RedirectToAction("CreateEnrollCourse", "EnrollCourse");
         }
 
 
-        public IActionResult PrintAll()
-        {
-            var q = new ActionAsPdf("ViewResult");
-            return q;
-        }
+        //public IActionResult PrintAll()
+        //{
+        //    var q = new ActionAsPdf("ViewResult");
+        //    return q;
+        //}
 
 
         public JsonResult GetStudentNameEmailDeptByRegNo(int studentId)

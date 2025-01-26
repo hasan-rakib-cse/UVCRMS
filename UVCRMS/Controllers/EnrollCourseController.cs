@@ -38,7 +38,8 @@ namespace UVCRMS.Controllers
             db.Entry(enrollInACourse).State = EntityState.Added;
             db.SaveChanges();
 
-            return RedirectToAction("CreateEnrollCourse", "EnrollCourse").WithNotice("Enroll Successfully");
+            //return RedirectToAction("CreateEnrollCourse", "EnrollCourse").WithNotice("Enroll Successfully");
+            return RedirectToAction("CreateEnrollCourse", "EnrollCourse");
         }
 
 

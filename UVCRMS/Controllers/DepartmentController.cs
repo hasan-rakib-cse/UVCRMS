@@ -13,39 +13,29 @@ namespace UVCRMS.Controllers
             db = dbContext;
         }
 
-
         public IActionResult Index()
         {
             return View(db.Departments.ToList());
         }
-
-        public IActionResult PrintAll()
-        {
-            var q = new ActionAsPdf("Index");
-            return q;
-        }
-
 
         public IActionResult Details(int id)
         {
             return View(db.Departments.Where(x => x.Id == id).FirstOrDefault());
         }
 
-
         public IActionResult Edit(int id)
         {
             return View(db.Departments.Where(x => x.Id == id).FirstOrDefault());
         }
-
 
         [HttpPost]
         public IActionResult Edit(Department dept)
         {
             try
             {
-                db.Entry(dept).State = EntityState.Modified;
+                db.Departments.Add(dept);
                 db.SaveChanges();
-
+                TempData["update_success_msg"] = "Data Updated Successfully.";
                 return RedirectToAction("Index", "Department");
             }
             catch
@@ -54,18 +44,35 @@ namespace UVCRMS.Controllers
             }
         }
 
-        public IActionResult Delete(int id)
+        public IActionResult Delete(int? id)
         {
-            return View(db.Departments.Where(x => x.Id == id).FirstOrDefault());
+            if (id == null || db.Departments == null)
+            {
+                return NotFound();
+            }
+
+            var department = db.Departments.FirstOrDefault(x => x.Id == id);
+            if (department == null)
+            {
+                return NotFound();
+            }
+            return View(department);
         }
 
-
-        [HttpPost]
-        public IActionResult Delete(int id, FormCollection collection)
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int? id)
         {
-            Department dept = db.Departments.Where(x => x.Id == id).FirstOrDefault();
-            db.Entry(dept).State = EntityState.Deleted;
+            var dept = db.Departments.FirstOrDefault(x => x.Id == id);
+            if (dept == null)
+            {
+                return NotFound();
+            }
+
+            db.Departments.Remove(dept); // Efficient way to delete
             db.SaveChanges();
+
+            TempData["delete_success_msg"] = "Data Deleted Successfully.";
             return RedirectToAction("Index", "Department");
         }
 
@@ -75,36 +82,33 @@ namespace UVCRMS.Controllers
             var dept = db.Departments.ToList();
             if (!dept.Any(x => x.DepartmentCode.ToLower() == DepartmentCode.ToLower()))
             {
-                return Json(true, JsonRequestBehavior.AllowGet);
+                return Json(true);
             }
-            return Json(false, JsonRequestBehavior.AllowGet);
+            return Json(false);
         }
-
 
         public JsonResult IsNameExist(string DepartmentName)
         {
             var dept = db.Departments.ToList();
             if (!dept.Any(x => x.DepartmentName.ToLower() == DepartmentName.ToLower()))
             {
-                return Json(true, JsonRequestBehavior.AllowGet);
+                return Json(true);
             }
-            return Json(false, JsonRequestBehavior.AllowGet);
+            return Json(false);
         }
-
 
         public IActionResult Create()
         {
             return View();
         }
 
-
         [HttpPost]
         public IActionResult Create(Department dept)
         {
-            db.Entry(dept).State = EntityState.Added;
+            db.Departments.Add(dept);
             db.SaveChanges();
-
-            return RedirectToAction("Create", "Department").WithNotice("Succesfully Department Saved");
+            TempData["SuccessMessage"] = "Successfully saved the department.";
+            return RedirectToAction("Create", "Department");
         }
 
         protected override void Dispose(bool disposing)

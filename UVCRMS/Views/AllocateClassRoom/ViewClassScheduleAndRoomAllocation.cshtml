@@ -1,7 +1,8 @@
 ﻿@model UVCRMS.Models.ClassRoomAllocation
 
 @{
-    ViewBag.Title = "View Class Schedule And Room Allocation";
+    ViewBag.Title = "ViewClassScheduleAndRoomAllocation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container" style="width: 70%; margin: 0 auto">
@@ -30,44 +31,44 @@
 
 @section scripts
 {
-    <a href="~/lib/jquery/dist/jquery.min.map">~/lib/jquery/dist/jquery.min.map</a>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/Scripts/jquery-3.4.1.js"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
     <script src="~/Scripts/DataTables/jquery.dataTables.js"></script>
 
     <script>
-        $(document).ready(function () {
-            $("#DepartmentId").change(function () {
-                var deptId = $("#DepartmentId").val();
-                var parameter = { deptId: deptId }
+    $(document).ready(function () {
+        $("#DepartmentId").change(function () {
+            var deptId = $("#DepartmentId").val();
+            var parameter = { deptId: deptId }
 
 
-                //  $("#DepartmentId").append('<option value="">--Select--</option>');
+            //  $("#DepartmentId").append('<option value="">--Select--</option>');
 
-                $.ajax({
-                    type: "POST",
-                    url: '@Url.Action("GetClassScheduleAndRoomAllocationByDeptId", "AllocateClassRoom")',
-                    contentType: "application/json;charset=utf-8",
-                    data: JSON.stringify(parameter),
-                    success: function (data) {
-                        $("#myTable").show();
-                        table.clear().draw(false);
-                        $.each(data, function (key, value) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetClassScheduleAndRoomAllocationByDeptId", "AllocateClassRoom")',
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify(parameter),
+                success: function (data) {
+                    $("#myTable").show();
+                    table.clear().draw(false);
+                    $.each(data,function (key, value) {
                             table.row.add([
-                                value.CourseCode, value.CourseName, value.ScheduleInfo
-                            ]
+                                value.CourseCode , value.CourseName , value.ScheduleInfo
+                                ]
                             ).draw(false);
 
                         });
 
-                    }
-
-                });
+                }
 
             });
 
-
-            var table = $('#myTable').DataTable();
         });
+
+
+        var table = $('#myTable').DataTable();
+    });
     </script>
 }

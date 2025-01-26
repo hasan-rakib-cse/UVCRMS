@@ -39,22 +39,34 @@ namespace UVCRMS.Controllers
                 teacher.TeacherRemainingCredit = teacher.CreditToBeTaken;
                 db.Entry(teacher).State = EntityState.Added;
                 db.SaveChanges();
-                return RedirectToAction("Create", "Teacher").WithNotice("Successfully Teacher Saved");
+                //return RedirectToAction("Create", "Teacher").WithNotice("Successfully Teacher Saved");
+                return RedirectToAction("Create", "Teacher");
             }
 
             ModelState.Clear();
-            return View().WithFlash("Not Saved");
+            //return View().WithFlash("Not Saved");
+            return View();
         }
 
 
-        public JsonResult IsEmailExist(string TeacherEmail)
+        //public JsonResult IsEmailExist(string TeacherEmail)
+        //{
+        //    var email = db.Teachers.ToList();
+        //    if (!email.Any(x => x.TeacherEmail.ToLower() == TeacherEmail.ToLower()))
+        //    {
+        //        return Json(true, JsonRequestBehavior.AllowGet);
+        //    }
+        //    return Json(false, JsonRequestBehavior.AllowGet);
+        //}
+
+        //[HttpPost]
+        public IActionResult IsEmailExist(string teacherEmail)
         {
-            var email = db.Teachers.ToList();
-            if (!email.Any(x => x.TeacherEmail.ToLower() == TeacherEmail.ToLower()))
-            {
-                return Json(true, JsonRequestBehavior.AllowGet);
-            }
-            return Json(false, JsonRequestBehavior.AllowGet);
+            var emailExists = db.Teachers
+                                .Any(x => x.TeacherEmail.ToLower() == teacherEmail.ToLower());
+
+            // Return JSON response (true if email does not exist, false if it does)
+            return Json(!emailExists);
         }
 
 

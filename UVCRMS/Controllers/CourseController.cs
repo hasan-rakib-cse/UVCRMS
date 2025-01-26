@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using UVCRMS.Data;
 using UVCRMS.Models;
+using static UVCRMS.Models.SemesterEnum;
 
 namespace UVCRMS.Controllers
 {
@@ -14,97 +15,131 @@ namespace UVCRMS.Controllers
             db = dbContext;
         }
 
-
         public IActionResult Index()
         {
             return View(db.Courses.ToList());
         }
 
-
         public IActionResult Create()
         {
-            ViewBag.Departments = new SelectList(db.Departments.ToList(), "Id", "DepartmentName");
-            ViewBag.Semesters = new SelectList(db.Semesters.ToList(), "Id", "SemesterName");
+            var departments = db.Departments.Select(d => new
+            {
+                Id = d.Id,
+                DepartmentName = d.DepartmentName
+            }).ToList();
+
+            var semesters = db.Semesters.Select(s => new
+            {
+                Id = s.Id,
+                SemesterName = s.SemesterName
+            }).ToList();
+
+            ViewBag.Departments = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(departments, "Id", "DepartmentName");
+            ViewBag.Semesters = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(semesters, "Id", "SemesterName");
             return View();
         }
 
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(Course course)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(course).State = EntityState.Added;
+                db.Courses.Add(course);
                 db.SaveChanges();
-                return RedirectToAction("Create", "Course").WithNotice("Successfully Course Saved");
+                TempData["insert_success_msg"] = "Data Inserted Successfully.";
             }
-            ModelState.Clear();
-            return RedirectToAction("Create", "Course").WithError("Not Saved");
+            return RedirectToAction("Create", "Course");
         }
 
-
-        public JsonResult IsCourseCodeExist(string courseCode)
+        [HttpGet]
+        public IActionResult IsCourseCodeExist(string courseCode)
         {
             var course = db.Courses.ToList();
             if (!course.Any(x => x.CourseCode.ToLower() == courseCode.ToLower()))
             {
-                return Json(true, JsonRequestBehavior.AllowGet);
+                return Json(true);
             }
-            return Json(false, JsonRequestBehavior.AllowGet);
+            return Json(false);
         }
 
-
-        public JsonResult IsCourseNameExist(string coursName)
+        [HttpGet]
+        public IActionResult IsCourseNameExist(string coursName)
         {
             var course = db.Courses.ToList();
             if (!course.Any(x => x.CourseName.ToLower() == coursName.ToLower()))
             {
-                return Json(true, JsonRequestBehavior.AllowGet);
+                return Json(true);
             }
-            return Json(false, JsonRequestBehavior.AllowGet);
+            return Json(false);
         }
-
 
         public IActionResult Edit(int id)
         {
-            ViewBag.Departments = new SelectList(db.Departments.ToList(), "Id", "DepartmentName");
-            ViewBag.Semesters = new SelectList(db.Semesters.ToList(), "Id", "SemesterName");
-            return View(db.Courses.Where(x => x.Id == id).FirstOrDefault());
-        }
+            var departments = db.Departments.Select (d => new 
+            {
+               Id = d.Id,
+               DepartmentName = d.DepartmentName
+            }).ToList();
 
+            var semesters = db.Semesters.Select(s => new
+            {
+                Id = s.Id,
+                SemesterName = s.SemesterName
+            }).ToList();
+
+            ViewBag.Departments = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(departments, "Id", "DepartmentName");
+            ViewBag.Semesters = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(semesters, "Id", "SemesterName");
+
+            var course = db.Courses.FirstOrDefault(x => x.Id == id);
+            if(course == null)
+            {
+                return NotFound();
+            }
+            return View(course);
+        }
 
         [HttpPost]
         public IActionResult Edit(Course course)
         {
-            db.Entry(course).State = EntityState.Modified;
-            db.SaveChanges();
-
+            if(course is not null)
+            {
+                db.Courses.Add(course);
+                db.SaveChanges();
+            }
             return RedirectToAction("Index", "Course");
         }
-
 
         public IActionResult Details(int id)
         {
             return View(db.Courses.Where(x => x.Id == id).FirstOrDefault());
         }
 
-
-        public IActionResult Delete(int id)
+        public IActionResult Delete(int? id)
         {
-            return View(db.Courses.Where(x => x.Id == id).FirstOrDefault());
+            if(id == null || db.Courses == null) 
+            { 
+                return NotFound();
+            }
+            var course = db.Courses.FirstOrDefault(c => c.Id == id);
+            return View(course);
         }
 
 
-        [HttpPost]
-        public IActionResult Delete(int id, FormCollection collection)
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int? id)
         {
-            Course course = db.Courses.Where(x => x.Id == id).FirstOrDefault();
-            db.Entry(course).State = EntityState.Deleted;
+            var course = db.Courses.FirstOrDefault(c => c.Id == id);
+            if(course == null )
+            {
+                return NotFound();
+            }
+            db.Courses.Remove(course);
             db.SaveChanges();
 
             return RedirectToAction("Index", "Course");
         }
-
 
         protected override void Dispose(bool disposing)
         {
@@ -114,7 +149,5 @@ namespace UVCRMS.Controllers
             }
             base.Dispose(disposing);
         }
-
-
     }
 }
