@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using UVCRMS.Data;
 using UVCRMS.Gateway;
 
-//using UVCRMS.Gateway;
 using UVCRMS.Models;
 
 namespace UVCRMS.Controllers
@@ -19,23 +18,24 @@ namespace UVCRMS.Controllers
             gateway = viewClassSchedule;
         }
 
-
         public IActionResult Index(CourseAssignToTeacher courseAssign)
         {
             return View(db.CourseAssignToTeachers.ToList());
         }
 
-        public IActionResult Create()
+        public  IActionResult Create()
         {
-            ViewBag.Departments = new SelectList(db.Departments, "Id", "DepartmentCode");
-
-            ViewBag.Courses = new SelectList(db.Courses, "Id", "CourseCode");
-            ViewBag.Rooms = new SelectList(db.Rooms, "Id", "RoomNo");
+            ViewBag.Departments = db.Departments.Select(d => new
+            {
+                d.Id,
+                d.DepartmentCode
+            }).ToList();
+            ViewBag.Courses = db.Courses.Select(c => new { c.Id, c.CourseCode }).ToList();
+            ViewBag.Rooms = db.Rooms.Select(r => new { r.Id, r.RoomNo }).ToList();
             ViewBag.SevenDayWeeks = new SelectList(db.SevenDayWeeks, "Id", "DayCode");
 
             return View();
         }
-
 
         //[HttpPost]
         //public IActionResult Create(ClassRoomAllocation classRoomAllocation)
@@ -68,8 +68,57 @@ namespace UVCRMS.Controllers
 
         //}
 
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromBody] ClassRoomAllocation classRoomAllocation)
+        //{
+        //    if (classRoomAllocation == null)
+        //    {
+        //        return BadRequest("Invalid classroom allocation data.");
+        //    }
+
+        //    // Assign default status
+        //    classRoomAllocation.Status = "Allocate";
+
+        //    // Format and validate time
+        //    if (classRoomAllocation.TimeFrom.Length != 5 || classRoomAllocation.TimeTo.Length != 5)
+        //    {
+        //        return BadRequest("Invalid time format. Expected HH:mm.");
+        //    }
+
+        //    classRoomAllocation.TimeFrom = classRoomAllocation.TimeFrom.Replace(":", "");
+        //    classRoomAllocation.TimeTo = classRoomAllocation.TimeTo.Replace(":", "");
+
+        //    if (Convert.ToInt32(classRoomAllocation.TimeFrom) > Convert.ToInt32(classRoomAllocation.TimeTo))
+        //    {
+        //        return BadRequest("Start time must be earlier than or equal to end time.");
+        //    }
+
+        //    // Validate course existence
+        //    var course = await db.Courses.FirstOrDefaultAsync(x => x.Id == classRoomAllocation.CourseId);
+        //    if (course == null)
+        //    {
+        //        return NotFound("Course not found.");
+        //    }
+
+        //    // Check if the day is already allocated
+        //    if (await IsDayExistAsync(classRoomAllocation.CourseId, classRoomAllocation.SevenDayWeekId))
+        //    {
+        //        return Conflict("The day is already assigned to the particular course.");
+        //    }
+
+        //    // Add classroom allocation
+        //    db.ClassRoomAllocations.Add(classRoomAllocation);
+        //    await db.SaveChangesAsync();
+
+        //    return Ok(new
+        //    {
+        //        Message = "Class allocated successfully.",
+        //        Allocation = classRoomAllocation
+        //    });
+        //}
+
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ClassRoomAllocation classRoomAllocation)
+        public IActionResult Create(ClassRoomAllocation classRoomAllocation)
         {
             if (classRoomAllocation == null)
             {
@@ -78,86 +127,62 @@ namespace UVCRMS.Controllers
 
             // Assign default status
             classRoomAllocation.Status = "Allocate";
+            classRoomAllocation.TimeFrom = classRoomAllocation.TimeFrom.Remove(2, 1);
+            classRoomAllocation.TimeTo = classRoomAllocation.TimeTo.Remove(2, 1);
 
-            // Format and validate time
-            if (classRoomAllocation.TimeFrom.Length != 5 || classRoomAllocation.TimeTo.Length != 5)
+            if (Convert.ToInt32(classRoomAllocation.TimeFrom) <= Convert.ToInt32(classRoomAllocation.TimeTo))
             {
-                return BadRequest("Invalid time format. Expected HH:mm.");
+                if (IsDayExist(classRoomAllocation.CourseId, classRoomAllocation.SevenDayWeekId))
+                {
+                    db.ClassRoomAllocations.Add(classRoomAllocation);
+                    db.SaveChanges();
+
+                    TempData["SuccessMessage"] = "Class Allocated Successfully";
+                    return RedirectToAction("Create", "AllocateClassRoom");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Class Not Allocated Because the Day is Already Assigned to the Particular Course.";
+                    return RedirectToAction("Create", "AllocateClassRoom");
+                }
             }
 
-            classRoomAllocation.TimeFrom = classRoomAllocation.TimeFrom.Replace(":", "");
-            classRoomAllocation.TimeTo = classRoomAllocation.TimeTo.Replace(":", "");
-
-            if (Convert.ToInt32(classRoomAllocation.TimeFrom) > Convert.ToInt32(classRoomAllocation.TimeTo))
-            {
-                return BadRequest("Start time must be earlier than or equal to end time.");
-            }
-
-            // Validate course existence
-            var course = await db.Courses.FirstOrDefaultAsync(x => x.Id == classRoomAllocation.CourseId);
-            if (course == null)
-            {
-                return NotFound("Course not found.");
-            }
-
-            // Check if the day is already allocated
-            if (await IsDayExistAsync(classRoomAllocation.CourseId, classRoomAllocation.SevenDayWeekId))
-            {
-                return Conflict("The day is already assigned to the particular course.");
-            }
-
-            // Add classroom allocation
-            db.ClassRoomAllocations.Add(classRoomAllocation);
-            await db.SaveChangesAsync();
-
-            return Ok(new
-            {
-                Message = "Class allocated successfully.",
-                Allocation = classRoomAllocation
-            });
+            TempData["ErrorMessage"] = "Time Format is Not Correct.";
+            return RedirectToAction("Create", "AllocateClassRoom");
         }
 
-        private async Task<bool> IsDayExistAsync(int courseId, int sevenDayWeekId)
-        {
-            return await db.ClassRoomAllocations.AnyAsync(x =>
-                x.CourseId == courseId && x.SevenDayWeekId == sevenDayWeekId && x.Status == "Allocate");
-        }
-
-
+        //public async Task<bool> IsDayExistAsync(int courseId, int sevenDayWeekId)
+        //{
+        //    return await db.ClassRoomAllocations.AnyAsync(x => x.CourseId == courseId &&
+        //                                                  x.SevenDayWeekId == sevenDayWeekId && 
+        //                                                  x.Status == "Allocate");
+        //}
 
         public bool IsDayExist(int courseId, int dayId)
         {
             var classAllocation = db.ClassRoomAllocations.ToList();
-            if (!classAllocation.Any(x => x.SevenDayWeekId == dayId && x.CourseId == courseId))
+            if(!classAllocation.Any(c => c.SevenDayWeekId == dayId && c.CourseId == courseId))
             {
                 return true;
             }
-
             return false;
         }
-
 
         public IActionResult ViewClassScheduleAndRoomAllocation()
         {
             ViewBag.Departments = new SelectList(db.Departments, "Id", "DepartmentCode");
             return View();
         }
-
-
         public JsonResult GetClassScheduleAndRoomAllocationByDeptId(int deptId)
         {
             var getAllClassScheduleViews = GetAllClassScheduleViews(deptId);
             return Json(getAllClassScheduleViews);
         }
-
-
         public JsonResult GetCourseByDeptId(int deptId)
         {
             var courses = db.Courses.Where(x => x.DepartmentId == deptId).ToList();
             return Json(courses);
         }
-
-
         public List<ClassScheduleView> GetAllClassScheduleViews(int departmentId)
         {
             //ViewClassSchedule gateway = new ViewClassSchedule();
@@ -241,15 +266,12 @@ namespace UVCRMS.Controllers
         //    return groupedSchedules;
         //}
 
-
-
         [HttpGet]
         public IActionResult UnallocatedClassRooms()
         {
             ViewData["Message"] = "";
             return View();
         }
-
 
         [HttpPost]
         public IActionResult UnallocatedClassRooms(string unallocatedClassRoom)
@@ -266,7 +288,6 @@ namespace UVCRMS.Controllers
             return View();
         }
 
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -275,6 +296,5 @@ namespace UVCRMS.Controllers
             }
             base.Dispose(disposing);
         }
-
     }
 }
