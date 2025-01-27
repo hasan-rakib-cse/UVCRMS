@@ -24,10 +24,21 @@ namespace UVCRMS.Controllers
             return View(db.CourseAssignToTeachers.ToList());
         }
 
+        // This code will work also.
+        //public IActionResult CourseAssignToTeacher()
+        //{
+        //    ViewBag.Departments = new SelectList(db.Departments, "Id", "DepartmentCode");
+        //    return View();
+        //}
 
         public IActionResult CourseAssignToTeacher()
         {
-            ViewBag.Departments = new SelectList(db.Departments, "Id", "DepartmentCode");
+            var departments = db.Departments.Select(d => new
+            {
+                d.Id,
+                d.DepartmentCode
+            }).ToList();
+            ViewBag.Departments = new Microsoft.AspNetCore.Mvc.Rendering.SelectList(departments, "Id", "DepartmentCode");
             return View();
         }
 
@@ -60,8 +71,7 @@ namespace UVCRMS.Controllers
             // Check if the input is valid
             if (courseAssign == null || courseAssign.CourseId <= 0 || courseAssign.TeacherId <= 0)
             {
-                //return RedirectToAction("CourseAssignToTeacher")
-                //    .WithNotice("Invalid input. Please provide valid course and teacher details.");
+                TempData["invalid_input"] = "Invalid input. Please provide valid course and teacher details.";
                 return RedirectToAction("CourseAssignToTeacher");
             }
 
@@ -71,15 +81,13 @@ namespace UVCRMS.Controllers
             // Ensure course and teacher exist
             if (course == null)
             {
-                //return RedirectToAction("CourseAssignToTeacher")
-                //    .WithNotice("Course not found.");
+                TempData["course_not_found"] = "Course not found.";
                 return RedirectToAction("CourseAssignToTeacher");
             }
 
             if (teacher == null)
             {
-                //return RedirectToAction("CourseAssignToTeacher")
-                //    .WithNotice("Teacher not found.");
+                TempData["teacher_not_found"] = "Teacher not found.";
                 return RedirectToAction("CourseAssignToTeacher");
             }
 
@@ -88,33 +96,31 @@ namespace UVCRMS.Controllers
             {
                 if (teacher.TeacherRemainingCredit < course.CourseCredit)
                 {
-                    //return RedirectToAction("CourseAssignToTeacher")
-                    //    .WithNotice("Teacher does not have enough remaining credits to assign this course.");
+                    TempData["not_enough_credit"] = "Teacher does not have enough remaining credits to assign this course.";
                     return RedirectToAction("CourseAssignToTeacher");
                 }
 
                 // Update the remaining credit of the teacher
-                teacher.TeacherRemainingCredit -= course.CourseCredit;
-                db.Entry(teacher).State = EntityState.Modified;
+                teacher.TeacherRemainingCredit = teacher.TeacherRemainingCredit - course.CourseCredit;
+                //db.Entry(teacher).State = EntityState.Modified;
+                db.Teachers.Update(teacher);
                 db.SaveChanges();
 
                 // Mark the course as assigned to the teacher
                 courseAssign.Status = "Assigned";
-                db.Entry(courseAssign).State = EntityState.Added;
+
+                //db.Entry(courseAssign).State = EntityState.Added;
+                db.CourseAssignToTeachers.Add(courseAssign);
                 db.SaveChanges();
 
-                // Redirect back with a success message
-                //return RedirectToAction("CourseAssignToTeacher")
-                //    .WithNotice("Course assigned to teacher successfully!");
-                return RedirectToAction("CourseAssignToTeacher");
+                TempData["SuccessMessage"] = "Course assigned to teacher successfully.";
+                return RedirectToAction("CourseAssignToTeacher", "CourseAssignToTeacher");
             }
 
             // If course code or teacher name already exists in the assignment
-            //return RedirectToAction("CourseAssignToTeacher")
-            //    .WithNotice("Not saved because the teacher name or course code already exists.");
+            TempData["SuccessMessage"] = "Not saved because the teacher name or course code already exists.";
             return RedirectToAction("CourseAssignToTeacher");
         }
-
 
         public bool IsCourseCodeExist(string courseCode)
         {
@@ -126,7 +132,6 @@ namespace UVCRMS.Controllers
             return false;
         }
 
-
         public bool IsTeacherNameExist(string teacherName)
         {
             var teacher = db.CourseAssignToTeachers.ToList();
@@ -137,7 +142,7 @@ namespace UVCRMS.Controllers
             return false;
         }
 
-
+        [HttpGet]
         public JsonResult GetAllAssignCourses(int deptId)
         {
             var assignedCourses = courseStatics.GetAllAssignCourses(deptId);
@@ -185,7 +190,6 @@ namespace UVCRMS.Controllers
             return View();
         }
 
-
         [HttpPost]
         public IActionResult UnassignCourse(string unAssignCourse)
         {
@@ -200,7 +204,6 @@ namespace UVCRMS.Controllers
             return View();
         }
 
-
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -209,6 +212,5 @@ namespace UVCRMS.Controllers
             }
             base.Dispose(disposing);
         }
-
     }
 }
