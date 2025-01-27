@@ -9,17 +9,18 @@ namespace UVCRMS.Controllers
     public class SaveStudentResultController : Controller
     {
         private readonly ApplicationDbContext db;
-        public SaveStudentResultController(ApplicationDbContext dbContext)
-        {
-            db = dbContext;
-        }
 
+        // Updated Version
+        public SaveStudentResultController(ApplicationDbContext dbContext) => db = dbContext;
+        //public SaveStudentResultController(ApplicationDbContext dbContext)
+        //{
+        //    db = dbContext;
+        //}
 
         public IActionResult Index()
         {
             return View(db.SaveStudentResults.ToList());
         }
-
 
         public IActionResult ViewResult()
         {
@@ -31,7 +32,6 @@ namespace UVCRMS.Controllers
             return View();
         }
 
-
         public IActionResult CreateEnrollCourse()
         {
             ViewBag.Students = new SelectList(db.Students.ToList(), "Id", "StudentRegNo");
@@ -42,26 +42,23 @@ namespace UVCRMS.Controllers
             return View();
         }
 
-
         [HttpPost]
         public IActionResult CreateEnrollCourse(SaveStudentResult saveStudentResult)
         {
             saveStudentResult.Status = "Enroll";
 
-            db.Entry(saveStudentResult).State = EntityState.Added;
+            db.SaveStudentResults.Add(saveStudentResult);
             db.SaveChanges();
 
-            //return RedirectToAction("CreateEnrollCourse", "EnrollCourse").WithNotice("Student Result Successfully");
+            TempData["student_result_successfully"] = "Student Result Successfully";
             return RedirectToAction("CreateEnrollCourse", "EnrollCourse");
         }
-
 
         //public IActionResult PrintAll()
         //{
         //    var q = new ActionAsPdf("ViewResult");
         //    return q;
         //}
-
 
         public JsonResult GetStudentNameEmailDeptByRegNo(int studentId)
         {
@@ -70,14 +67,12 @@ namespace UVCRMS.Controllers
             return Json(students);
         }
 
-
         public JsonResult GetStudentNameEmailDeptByStId(int studentId)
         {
             var student = db.Students.FirstOrDefault(x => x.Id == studentId);
 
             return Json(student);
         }
-
 
         protected override void Dispose(bool disposing)
         {
@@ -87,6 +82,5 @@ namespace UVCRMS.Controllers
             }
             base.Dispose(disposing);
         }
-
     }
 }
