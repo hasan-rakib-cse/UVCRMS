@@ -15,7 +15,7 @@ namespace UVCRMS.Gateway
         public CourseAssignTeacherGateway(IConfiguration configuration)
         {
             _configuration = configuration;
-            conString = configuration.GetConnectionString("ApplicationDbContext");
+            conString = configuration.GetConnectionString("ApplicationDbContext") ?? throw new ArgumentNullException(nameof(conString), "Connection string is missing.");
         }
 
         //private string conString = WebConfigurationManager.ConnectionStrings["ApplicationDbContext"].ConnectionString;
