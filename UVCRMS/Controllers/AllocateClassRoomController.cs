@@ -23,16 +23,28 @@ namespace UVCRMS.Controllers
             return View(db.CourseAssignToTeachers.ToList());
         }
 
-        public  IActionResult Create()
+        public IActionResult Create()
         {
-            ViewBag.Departments = db.Departments.Select(d => new
+            ViewBag.Departments = db.Departments.Select(d => new SelectListItem
             {
-                d.Id,
-                d.DepartmentCode
+                Value = d.Id.ToString(),
+                Text = d.DepartmentCode
             }).ToList();
-            ViewBag.Courses = db.Courses.Select(c => new { c.Id, c.CourseCode }).ToList();
-            ViewBag.Rooms = db.Rooms.Select(r => new { r.Id, r.RoomNo }).ToList();
+
+            ViewBag.Courses = db.Courses.Select(c => new SelectListItem
+            {
+                Value = c.Id.ToString(),
+                Text = c.CourseCode
+            }).ToList();
+            ViewBag.Rooms = db.Rooms.Select(r => new SelectListItem
+            {
+                Value = r.Id.ToString(),
+                Text = r.RoomNo
+            }).ToList();
             ViewBag.SevenDayWeeks = new SelectList(db.SevenDayWeeks, "Id", "DayCode");
+            //ViewBag.Courses = db.Courses.Select(c => new { c.Id, c.CourseCode }).ToList();
+            //ViewBag.Rooms = db.Rooms.Select(r => new { r.Id, r.RoomNo }).ToList();
+            //ViewBag.SevenDayWeeks = new SelectList(db.SevenDayWeeks, "Id", "DayCode");
 
             return View();
         }
@@ -161,7 +173,7 @@ namespace UVCRMS.Controllers
         public bool IsDayExist(int courseId, int dayId)
         {
             var classAllocation = db.ClassRoomAllocations.ToList();
-            if(!classAllocation.Any(c => c.SevenDayWeekId == dayId && c.CourseId == courseId))
+            if (!classAllocation.Any(c => c.SevenDayWeekId == dayId && c.CourseId == courseId))
             {
                 return true;
             }
